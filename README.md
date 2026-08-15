@@ -33,16 +33,16 @@ return Severity::Critical->value;   // 'critical'
 
 ```mermaid
 flowchart TB
-    subgraph frame["`**Frame** — die Sendung (3.3)`"]
+    subgraph frame["<b>Frame</b> — die Sendung (3.3)"]
         direction TB
         fmeta["identity · flushed_at<br/>dispatch_path · counters<br/>process_epoch · pid"]
 
-        subgraph event["`**Event** — die Beobachtung (3.)`"]
+        subgraph event["<b>Event</b> — die Beobachtung (3.)"]
             direction TB
             emeta["schema_version · event_id · timestamp<br/>layer · event_type · correlation_id<br/>event_severity · application_id<br/>instance_id · environment"]
-            actor["`**actor** — wer<br/><small>user · ip · session_id_hash<br/>client_fingerprint</small>`"]
-            payload["`**payload** — was (3.1)<br/><small>Struktur je event_type</small>`"]
-            raw["`**raw** — der Rohbeleg<br/><small>nur bei warning/critical</small>`"]
+            actor["<b>actor</b> — wer<br/><small>user · ip · session_id_hash<br/>client_fingerprint</small>"]
+            payload["<b>payload</b> — was (3.1)<br/><small>Struktur je event_type</small>"]
+            raw["<b>raw</b> — der Rohbeleg<br/><small>nur bei warning/critical</small>"]
         end
     end
 
