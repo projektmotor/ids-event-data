@@ -1,0 +1,49 @@
+{
+    "name": "projektmotor/ids-event-data",
+    "type": "library",
+    "description": "Das Drahtformat der IDS-Ereignisse: Feldnamen, Wertelisten, Value Objects, Frame — reines PHP, ohne Framework",
+    "license": "MIT",
+    "keywords": [
+        "ids",
+        "intrusion-detection",
+        "event-format",
+        "wire-format",
+        "security"
+    ],
+    "authors": [
+        {
+            "name": "Sören Helbig",
+            "email": "soeren.helbig@projektmotor.de"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "ext-json": "*",
+        "friendsofphp/php-cs-fixer": "^3.60",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "ProjektMotor\\IdsEventData\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ProjektMotor\\IdsEventData\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

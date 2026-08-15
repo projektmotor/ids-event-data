@@ -1,0 +1,22 @@
+parameters:
+    # Level 9 statt 8 wie im Sensor-Bundle: die mixed-lastigen Ränder — Query-Parameter,
+    # getPayload(): array, der Aufbau des raw-Feldes — liegen alle im Bundle. Hier sind
+    # es Value Objects und Konstanten, und dafür ist die schärfere Stufe kostenlos.
+    level: 9
+    paths:
+        - src
+        - tests
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # Die Konstanten-Tests vergleichen absichtlich ein Literal mit einer Konstante:
+        # `assertSame(1, EventSchema::SCHEMA_VERSION)` ist für PHPStan eine Tautologie,
+        # weil es beide Seiten kennt. Für den Vertrag mit dem Collector ist es die
+        # eigentliche Aussage — die Konstante ist eine Zahl, die ein Mensch ändern kann,
+        # und dann soll der Test brechen. Das ist genau die Sorte Änderung, die PHPStan
+        # nicht bemerken kann, und deshalb steht sie als Test da.
+        #
+        # Eng gefasst: nur dieser Identifier, nur unter tests/. In src/ wäre dieselbe
+        # Meldung ein echter Fund.
+        -
+            identifier: staticMethod.alreadyNarrowedType
+            path: tests/*
