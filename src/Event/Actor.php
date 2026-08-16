@@ -20,7 +20,16 @@ namespace ProjektMotor\IdsEventData\Event;
 final class Actor
 {
     /**
-     * @param string|null $user              Benutzerkennung, gekürzt auf MAX_USER_LENGTH
+     * Die Benutzerkennung, gekürzt auf MAX_USER_LENGTH.
+     *
+     * Nicht promoted, weil der Konstruktor den übergebenen Wert kürzt: eine readonly
+     * Promotion nimmt das Argument unverändert entgegen und lässt sich danach nicht
+     * mehr überschreiben.
+     */
+    public readonly ?string $user;
+
+    /**
+     * @param string|null $user              Benutzerkennung; wird auf MAX_USER_LENGTH gekürzt
      * @param string|null $ip                Client-IP; nur korrekt, wenn die Anwendung
      *                                       framework.trusted_proxies gesetzt hat
      * @param string|null $sessionIdHash     HMAC-SHA256 der Session-ID; die Session-ID
@@ -29,11 +38,12 @@ final class Actor
      *                                       Accept-Encoding
      */
     public function __construct(
-        public readonly ?string $user = null,
+        ?string $user = null,
         public readonly ?string $ip = null,
         public readonly ?string $sessionIdHash = null,
         public readonly ?string $clientFingerprint = null,
     ) {
+        $this->user = self::truncateUser($user);
     }
 
     /**
@@ -58,7 +68,7 @@ final class Actor
     public function withUser(?string $user): self
     {
         return new self(
-            self::truncateUser($user),
+            $user,
             $this->ip,
             $this->sessionIdHash,
             $this->clientFingerprint,
@@ -82,6 +92,12 @@ final class Actor
         );
     }
 
+    /**
+     * Die Kürzung selbst — vom Konstruktor auf jedem Weg angewandt.
+     *
+     * Öffentlich, weil Aufrufer denselben Wert außerhalb eines Actor bilden
+     * müssen, etwa für einen Vergleich oder eine Protokollzeile.
+     */
     public static function truncateUser(?string $user): ?string
     {
         if (null === $user) {

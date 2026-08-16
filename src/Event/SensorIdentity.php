@@ -31,7 +31,17 @@ final class SensorIdentity
 {
     public const MAX_ID_LENGTH = 64;
 
-    private const ID_PATTERN = '/^[A-Za-z0-9._:-]{1,64}$/';
+    /**
+     * Die erlaubten Zeichen — als Konstante, weil sowohl das Prüfmuster als auch die
+     * Beanstandungstexte in validate() sie nennen.
+     */
+    private const ID_CHARACTERS = '[A-Za-z0-9._:-]';
+
+    /**
+     * Aus beiden Konstanten zusammengesetzt, damit eine geänderte Grenze auch
+     * tatsächlich geprüft wird und nicht nur in der Meldung steht.
+     */
+    private const ID_PATTERN = '/^'.self::ID_CHARACTERS.'{1,'.self::MAX_ID_LENGTH.'}$/';
 
     public function __construct(
         public readonly string $applicationId,
@@ -65,8 +75,9 @@ final class SensorIdentity
             $problems[] = 'application_id ist leer';
         } elseif (!self::isValidId($this->applicationId)) {
             $problems[] = \sprintf(
-                'application_id "%s" entspricht nicht dem Muster [A-Za-z0-9._:-]{1,%d}',
+                'application_id "%s" entspricht nicht dem Muster %s{1,%d}',
                 $this->applicationId,
+                self::ID_CHARACTERS,
                 self::MAX_ID_LENGTH,
             );
         }
@@ -75,8 +86,9 @@ final class SensorIdentity
             $problems[] = 'instance_id ist leer';
         } elseif (!self::isValidId($this->instanceId)) {
             $problems[] = \sprintf(
-                'instance_id "%s" entspricht nicht dem Muster [A-Za-z0-9._:-]{1,%d}',
+                'instance_id "%s" entspricht nicht dem Muster %s{1,%d}',
                 $this->instanceId,
+                self::ID_CHARACTERS,
                 self::MAX_ID_LENGTH,
             );
         }

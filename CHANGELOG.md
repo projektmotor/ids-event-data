@@ -9,6 +9,37 @@ Semver gilt für das **gesamte** Paket. Es gibt hier nichts Internes: jede Konst
 jeder Enum-Wert und jeder Feldname in `toArray()` ist Vertragstext, auf den sich die
 Gegenseite verlässt.
 
+## [0.1.1] — 2026-08-16
+
+### Changed — `Actor::__construct()` kürzt die Benutzerkennung jetzt selbst
+
+`MAX_USER_LENGTH` wurde bisher nur in `withUser()` durchgesetzt. `new Actor($kennung)`
+ging an der Grenze vorbei und reichte den Wert ungekürzt weiter.
+
+Das ist keine Formalie: bei fehlgeschlagener Anmeldung ist die Benutzerkennung
+angreifergesteuert, Symfonys `UserBadge` erlaubt bis zu 4096 Zeichen, und genau diese
+Events treten bei Brute-Force massenhaft auf. Über den Konstruktor ließ sich damit jedes
+Fehlversuch-Event um 4 KB aufblähen.
+
+**Wirkung auf den Draht:** wer `Actor` direkt erzeugt und dabei eine Kennung über 200
+Zeichen übergibt, bekommt jetzt den gekürzten Wert im Event statt des vollständigen.
+`ids-sensor-bundle` ist nicht betroffen — es geht über `CapturedEvent::setActorUser()`
+und damit schon immer über `withUser()`.
+
+`$user` ist deshalb keine promoted Property mehr, sondern wird im Konstruktorrumpf
+gesetzt; `readonly` und die Signatur bleiben unverändert. `Actor::truncateUser()` bleibt
+öffentlich.
+
+### Fixed — `SensorIdentity`: die Längengrenze steht nur noch an einer Stelle
+
+`MAX_ID_LENGTH = 64` und `ID_PATTERN = '/^[A-Za-z0-9._:-]{1,64}$/'` nannten die 64
+getrennt voneinander. Wer die Konstante änderte, änderte die Prüfung in `isValidId()`
+nicht — `validate()` hätte dann eine Grenze gemeldet, die nicht gilt.
+
+`ID_PATTERN` wird jetzt aus `MAX_ID_LENGTH` und der neuen privaten Konstante
+`ID_CHARACTERS` zusammengesetzt, aus der auch die Beanstandungstexte stammen. Verhalten
+und Meldungstexte sind bei unverändertem Wert 64 identisch.
+
 ## [0.1.0] — 2026-08-15
 
 Erste Fassung. Das Paket entsteht durch Ausgliederung aus

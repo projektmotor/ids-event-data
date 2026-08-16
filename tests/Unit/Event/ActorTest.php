@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ProjektMotor\IdsEventData\Tests\Unit\Event;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ProjektMotor\IdsEventData\Event\Actor;
 use ProjektMotor\IdsEventData\Event\EventSchema;
@@ -34,14 +35,47 @@ final class ActorTest extends TestCase
         self::assertSame(Actor::MAX_USER_LENGTH, mb_strlen($actor->user));
     }
 
-    public function testTruncationIsMultibyteSafe(): void
+    /**
+     * Die Grenze hängt am Konstruktor, nicht an withUser(): sonst ginge jeder
+     * Konsument, der `new Actor($kennung)` schreibt, an ihr vorbei — und der
+     * angreifergesteuerte Wert stünde ungekürzt auf dem Draht.
+     */
+    public function testTheConstructorTruncatesAsWell(): void
     {
-        $actor = (new Actor())->withUser(str_repeat('ä', 500));
+        $actor = new Actor(str_repeat('a', 4096));
+
+        self::assertNotNull($actor->user);
+        self::assertSame(Actor::MAX_USER_LENGTH, mb_strlen($actor->user));
+    }
+
+    /**
+     * @param callable(string): Actor $baue
+     */
+    #[DataProvider('wegeZurBenutzerkennung')]
+    public function testTruncationIsMultibyteSafe(callable $baue): void
+    {
+        $actor = $baue(str_repeat('ä', 500));
 
         self::assertNotNull($actor->user);
         self::assertSame(Actor::MAX_USER_LENGTH, mb_strlen($actor->user));
         // Kein zerschnittenes Zeichen am Ende.
         self::assertSame($actor->user, mb_convert_encoding($actor->user, 'UTF-8', 'UTF-8'));
+    }
+
+    /**
+     * Beide Wege in einen Actor hinein müssen dieselbe Grenze durchsetzen.
+     *
+     * @return iterable<string, array{callable(string): Actor}>
+     */
+    public static function wegeZurBenutzerkennung(): iterable
+    {
+        yield 'Konstruktor' => [static fn (string $user): Actor => new Actor($user)];
+        yield 'withUser()' => [static fn (string $user): Actor => (new Actor())->withUser($user)];
+    }
+
+    public function testAShortIdentifierPassesThroughUnchanged(): void
+    {
+        self::assertSame('alice', (new Actor('alice'))->user);
     }
 
     public function testWithUserPreservesTheRemainingFields(): void
